@@ -49,10 +49,14 @@ export const authOptions: NextAuthOptions = {
      throw new Error('Incorrect password')
    }
 
-   } catch (err:any) {
+   } catch (err) {
     // used by sir
     //  throw new Error(err)
+    // throw new Error(err.message || "Login error");
+      if (err instanceof Error) {
     throw new Error(err.message || "Login error");
+  }
+  throw new Error("An unknown error occurred during login");
    }
     }
 }) 
