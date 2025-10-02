@@ -75,27 +75,19 @@
 
 
 
-
-
 import { getServerSession } from 'next-auth/next';
 import { User } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/options';
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
 
-interface DeleteContext {
-  params: {
-    messageid: string;
-  };
-}
-
 export async function DELETE(
   request: Request,
-  { params }: DeleteContext
+  context: { params: { messageid: string } }
 ) {
-  const messageId = params.messageid;
+  const { messageid } = context.params;
 
-  if (!messageId) {
+  if (!messageid) {
     return Response.json(
       { success: false, message: 'Message ID not found in request' },
       { status: 400 }
@@ -117,15 +109,12 @@ export async function DELETE(
   try {
     const updateResult = await UserModel.updateOne(
       { _id: user._id },
-      { $pull: { messages: { _id: messageId } } }
+      { $pull: { messages: { _id: messageid } } }
     );
 
     if (updateResult.modifiedCount === 0) {
       return Response.json(
-        {
-          success: false,
-          message: 'Message not found or already deleted',
-        },
+        { success: false, message: 'Message not found or already deleted' },
         { status: 404 }
       );
     }
