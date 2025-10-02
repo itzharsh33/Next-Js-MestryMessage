@@ -14,15 +14,25 @@ export const authOptions: NextAuthOptions = {
       identifier: { label: "Email", type: "text"},
       password: { label: "Password", type: "password" }
     },
-    async authorize(credentials:any):Promise<any>{
+    async authorize(credentials):Promise<any>{
    await dbConnect();
    try {
-  const user =   await UserModel.findOne({
-        $or: [
-            {email:credentials.identifier},
-             {username:credentials.identifier}
-        ]
-    })
+  // const user =   await UserModel.findOne({
+  //       $or: [
+  //           {email:credentials.identifier},
+  //            {username:credentials.identifier}
+  //       ]
+    // })
+        if (!credentials) {
+      throw new Error("Invalid credentials");
+    }
+
+    const user = await UserModel.findOne({
+      $or: [
+        { email: credentials.identifier },
+        { username: credentials.identifier },
+      ],
+    });
     if(!user){
     throw new Error("No user found with this email or username")
     }
@@ -65,10 +75,17 @@ export const authOptions: NextAuthOptions = {
           // session.user.isVerified = token.isVerified
           // session.user.isAcceptingMessages = token.isAcceptingMessages
           // session.user.username = token.username
-        (session.user as any)._id = token._id;
-        (session.user as any).isVerified = token.isVerified;
-        (session.user as any).isAcceptingMessages = token.isAcceptingMessages;
-        (session.user as any).username = token.username;
+
+        // (session.user as any)._id = token._id;
+        // (session.user as any).isVerified = token.isVerified;
+        // (session.user as any).isAcceptingMessages = token.isAcceptingMessages;
+        // (session.user as any).username = token.username;
+
+          (session.user )._id = token._id;
+        (session.user ).isVerified = token.isVerified;
+        (session.user ).isAcceptingMessages = token.isAcceptingMessages;
+        (session.user ).username = token.username;
+
         }
       return session
     },

@@ -47,7 +47,8 @@ const Page = () => {
       try {
       const response = await axios.get(`/api/check-username-unique?username=${username}`)
     //   console.log(response.data.message)
-      let message = response.data.message
+      // let message = response.data.message
+        const message = response.data.message
       setusernameMessage(message)
       } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
@@ -76,7 +77,8 @@ setisSubmitting(false)
    } catch (error) {
     console.error("Error in sighup of user",error)
     const axiosError = error as AxiosError<ApiResponse>;
-    let errorMessage = axiosError.response?.data.message
+    // let errorMessage = axiosError.response?.data.message
+    const errorMessage = axiosError.response?.data.message
 toast.error("Sign-up failed", {
   description: errorMessage
 })
