@@ -1,81 +1,136 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/options";
-import dbConnect from "@/lib/dbConnect";
-import UserModel from "@/model/User";
-import { User } from "next-auth";
+// import { getServerSession } from "next-auth";
+// import { authOptions } from "../../auth/[...nextauth]/options";
+// import dbConnect from "@/lib/dbConnect";
+// import UserModel from "@/model/User";
+// import { User } from "next-auth";
 
-interface Params {
-  params: {
-    messageid: string;
-  };
-}
+// interface Params {
+//   params: {
+//     messageid: string;
+//   };
+// }
 
 
-export async function DELETE(request:Request,
-  {params}:{params:{messageid:string}}
-  // context: { params: { messageid: string } }
-){
-  // const messageId = params.messageid
-  const messageId = params.messageid;
+// export async function DELETE(request:Request,
+//   {params}:{params:{messageid:string}}
+//   // context: { params: { messageid: string } }
+// ){
+//   // const messageId = params.messageid
+//   const messageId = params.messageid;
+//   await dbConnect();
+//   const session = await getServerSession(authOptions);
+//   // const user: User = session?.user;
+//     const user = session?.user as User & { _id: string };
+//   // const user: User = session?.user as User
+//   if (!session || !session.user) {
+//     return Response.json(
+//       {
+//         success: false,
+//         message: "Not Authenticated",
+//       },
+//       { status: 401 }
+//     );
+//   }
+
+
+//   try {
+//     const updateResult = await UserModel.updateOne(
+//       {_id:user._id},
+//       {$pull:{messages:{_id:messageId}}}
+//     )
+
+// if(updateResult.modifiedCount==0){
+//       return Response.json(
+//       {
+//         success: false,
+//         message: "Message not found or already deleted",
+//       },
+//       { status: 404 }
+//     );
+
+// }
+
+//       return Response.json(
+//       {
+//         success: true,
+//         message: "Message deleted",
+//       },
+//       { status: 200 }
+//     );
+
+//   } catch (error) {
+//     console.log("Error in delete message route",error)
+//           return Response.json(
+//       {
+//         success: false,
+//         message: "Error deleting messages",
+//       },
+//       { status: 500 }
+//     );
+//   }
+
+
+
+// }
+
+
+
+
+import { getServerSession } from 'next-auth/next';
+import { User } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/options';
+import dbConnect from '@/lib/dbConnect';
+import UserModel from '@/model/User';
+
+export async function DELETE(
+  request: Request,
+  // This is the required syntax for the second argument.
+  // It's a single context object that CONTAINS the params.
+  context: { params: { messageid: string } }
+) {
+  // You access messageid through context.params
+  const messageId = context.params.messageid;
+
   await dbConnect();
+
   const session = await getServerSession(authOptions);
-  // const user: User = session?.user;
-    const user = session?.user as User & { _id: string };
-  // const user: User = session?.user as User
-  if (!session || !session.user) {
+  const user: User = session?.user as User;
+
+  if (!session || !user) {
     return Response.json(
-      {
-        success: false,
-        message: "Not Authenticated",
-      },
+      { success: false, message: 'Not authenticated' },
       { status: 401 }
     );
   }
 
-
   try {
     const updateResult = await UserModel.updateOne(
-      {_id:user._id},
-      {$pull:{messages:{_id:messageId}}}
-    )
-
-if(updateResult.modifiedCount==0){
-      return Response.json(
-      {
-        success: false,
-        message: "Message not found or already deleted",
-      },
-      { status: 404 }
+      { _id: user._id },
+      { $pull: { messages: { _id: messageId } } }
     );
 
-}
-
+    if (updateResult.modifiedCount === 0) {
       return Response.json(
-      {
-        success: true,
-        message: "Message deleted",
-      },
+        {
+          success: false,
+          message: 'Message not found or already deleted',
+        },
+        { status: 404 }
+      );
+    }
+
+    return Response.json(
+      { success: true, message: 'Message deleted' },
       { status: 200 }
     );
-
   } catch (error) {
-    console.log("Error in delete message route",error)
-          return Response.json(
-      {
-        success: false,
-        message: "Error deleting messages",
-      },
+    console.error('Error deleting message:', error);
+    return Response.json(
+      { success: false, message: 'Error deleting message' },
       { status: 500 }
     );
   }
-
-
-
 }
-
-
-
-
 
 
 
