@@ -67,3 +67,59 @@ return Response.json({
 }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    const {searchParams} = new URL(request.url)
+
+// ->Parses the full request URL into a URL object and extracts its searchParams (an instance of URLSearchParams).
+
+// searchParams provides methods like .get('username').
+
+
+//     const queryParam = {
+//         username: searchParams.get('username')
+//     }
+
+//     -> Builds an object queryParam with a username property set to the query param value from the URL.
+
+// Important: searchParams.get(...) returns string | null. So queryParam.username may be null if the param is missing.
+
+
+// const result = usernameQuerySchema.safeParse(queryParam)
+
+// ->Validates queryParam against usernameQuerySchema.
+
+// safeParse returns an object with shape:
+
+// { success: true, data: parsedValue } if valid, or
+
+// { success: false, error: ZodError } if invalid.
+
+
+
+//     if(!result.success){
+//           const tree = z.treeifyError(result.error);
+//   const usernameErrors = tree.properties?.username?.errors||[];
+
+//   -> If validation failed, the code transforms the ZodError into a tree-like structure (using z.treeifyError(...)) and extracts username-specific errors.
+
+// tree.properties?.username?.errors — used to get an array of error messages for the username field. If not found, fall back to an empty array.
+
+// Note: z.treeifyError is intended to produce a nested error representation. (Depending on your Zod version, equivalent utilities: error.format() or error.flatten(). This code assumes treeifyError returns a structure with properties.)
+
+
+// from this onwards user is searched across databse and returned message

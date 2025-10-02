@@ -128,7 +128,7 @@
 / It ensures that the styles are applied correctly in both light and dark modes. */
 [data-sonner-toaster][data-theme="light"] {
 --normal-background: var(--toast-background);
-----normal-foreground: var(--toast-text-color);
+--normal-foreground: var(--toast-text-color);
 --error-background: var(--toast-error-background);
 --error-foreground: var(--toast-error-text);
 }
@@ -149,11 +149,6 @@
     @apply bg-background text-foreground;
   }
 }
-
-
-
-
-
 
 
 

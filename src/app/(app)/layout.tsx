@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
 // import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
       >
        <Navbar/>
         {children}
+
            {/* Footer */}
       <footer className="text-center p-4 md:p-6 bg-slate-900 text-slate-500 border-t border-slate-800">
         © 2025 True Feedback. All rights reserved.

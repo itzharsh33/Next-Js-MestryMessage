@@ -61,3 +61,39 @@ await user.save()
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+// await dbConnect(): ensure MongoDB connection ready.
+
+// await request.json(): parse incoming JSON body (the object you posted from the client).
+
+// decodeURIComponent(username): decodes URL-encoded username (defensive).
+
+// UserModel.findOne({ username }): fetch user doc from DB.
+
+// Validation:
+
+// isCodeValid: compares stored user.verifyCode with submitted code.
+
+// isCodeNotExpired: checks expiry (verifyCodeExpiry) > new Date() (current time).
+
+// Outcomes:
+
+// valid & not expired → set isVerified = true, save user, return 200 with success message.
+
+// expired → return 400 with message that code expired.
+
+// invalid code → return 400 with "Incorrect verification code".
+
+// catch returns 500 on unexpected errors.

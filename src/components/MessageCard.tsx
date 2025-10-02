@@ -1,90 +1,3 @@
-// "use client"
-// import { X } from "lucide-react"
-// import {
-//   Card,
-//   CardAction,
-//   CardContent,
-//   CardDescription,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card"
-
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-//   AlertDialogTrigger,
-// } from "@/components/ui/alert-dialog"
-// import { Button } from "@react-email/components"
-// import { Message } from "@/model/User"
-// import axios from "axios"
-// import { ApiResponse } from "@/types/ApiResponse"
-// import { toast } from "sonner"
-// type messageCardProps = {
-//     message:Message;
-//     onMessageDelete: (messageId:string) => void
-// }
-
-// const MessageCard = ({message, onMessageDelete}:messageCardProps) => {
-
-// const handleDeleteConfirm = async () =>{
-//     const response = await axios.delete<ApiResponse>(`/api/delete-message/${message._id}`)
-// toast(response.data.message);
-// onMessageDelete(message._id)
-// }
-//   return (
-//    <Card>
-//   <CardHeader>
-//     <CardTitle>Card Title</CardTitle>
-//       <AlertDialog>
-//       <AlertDialogTrigger asChild>
-//         <Button ><X className='w-5 h-5'/></Button>
-//       </AlertDialogTrigger>
-//       <AlertDialogContent>
-//         <AlertDialogHeader>
-//           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-//           <AlertDialogDescription>
-//             This action cannot be undone. This will permanently delete your
-//             account and remove your data from our servers.
-//           </AlertDialogDescription>
-//         </AlertDialogHeader>
-//         <AlertDialogFooter>
-//           <AlertDialogCancel>Cancel</AlertDialogCancel>
-//           <AlertDialogAction onClick={handleDeleteConfirm}>Continue</AlertDialogAction>
-//         </AlertDialogFooter>
-//       </AlertDialogContent>
-//     </AlertDialog>
-//     <CardDescription>Card Description</CardDescription>
-//     <CardAction>Card Action</CardAction>
-//   </CardHeader>
-//   <CardContent>
-   
-//   </CardContent>
-
-// </Card>
-//   )
-// }
-
-// export default MessageCard
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 "use client"
@@ -118,15 +31,20 @@ type MessageCardProps = {
     message: Message;
     onMessageDelete: (messageId: string) => void
 }
+// Defines props for this component:
+// message = the actual message object (content, id, createdAt).
+// onMessageDelete = a function passed by parent to update UI after deletion.
 
 const MessageCard = ({ message, onMessageDelete }: MessageCardProps) => {
-
+// Defines the MessageCard component.
+// Receives message and onMessageDelete from parent.
     const handleDeleteConfirm = async () => {
         try {
             const response = await axios.delete<ApiResponse>(`/api/delete-message/${message._id}`);
             toast.success(response.data.message);
             // Use the message._id from the component's props
             onMessageDelete(message._id as string);
+            // Calls parent’s function to remove this message from UI (without reloading).
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse>;
             toast.error(axiosError.response?.data.message ?? "Failed to delete message");

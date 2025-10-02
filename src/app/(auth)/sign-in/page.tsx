@@ -140,3 +140,91 @@ if (result?.error) {
 }
 
 export default page
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// const form = useForm<z.infer<typeof signInSchema>>({
+//   resolver: zodResolver(signInSchema),
+//   defaultValues:{
+//     identifier:'',
+//     password:''
+//   }
+// })
+
+
+// -> useForm(...) creates form state/handlers.
+
+// zodResolver(signInSchema) connects Zod schema validation to react-hook-form validation.
+
+// defaultValues sets initial values for form fields.
+
+
+// const onSubmit = async (data: z.infer<typeof signInSchema>) =>{
+//   const result = await signIn('credentials',{
+//     redirect:false,
+//     identifier:data.identifier,
+//     password:data.password
+//   })
+//   ...
+// }
+
+// -> onSubmit is called by form.handleSubmit(onSubmit) when the user submits and validation passes.
+
+// data is the validated form data (typed via z.infer).
+
+// signIn('credentials', {...}) calls NextAuth’s credentials provider:
+
+// redirect: false prevents NextAuth from doing an automatic browser redirect — instead it returns a result object.
+
+// The remaining fields (identifier, password) are passed to your credentials provider backend code.
+
+// What signIn returns:
+// When redirect:false, signIn resolves to an object like:
+
+// {
+//   error?: string,    // error message or error code
+//   ok?: boolean,      // true on success
+//   status?: number,
+//   url?: string | null // redirect url if any
+// }
+
+
+// if (result?.error) {
+//   toast.error("Login failed", {
+//     // description: "Incorrect username or password",
+//     description: result.error,
+//   });
+// } else {
+//   toast.success("Welcome back!");
+//   router.replace("/dashboard");
+// }
+
+// -> If result?.error exists, a toast shows the error message.
+
+// Otherwise, show a success toast and navigate to /dashboard.
+
+
+// FormField binds the UI input to react-hook-form via the field prop. field includes value, onChange, onBlur, ref.
+
+// Input {...field} wires the input to the form — changes update the form state.

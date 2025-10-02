@@ -1,153 +1,28 @@
-// import { openai } from '@ai-sdk/openai';
-// import { streamText, UIMessage, convertToModelMessages } from 'ai';
-
-// // Allow streaming responses up to 30 seconds
-// export const maxDuration = 30;
-
-// export async function POST(req: Request) {
-// try {
-//       const { messages }: { messages: UIMessage[] } = await req.json();
-
-//   const result = streamText({
-//     model: openai('gpt-4o'),
-//     messages: convertToModelMessages(messages),
-//   });
-
-//   return result.toUIMessageStreamResponse();
-// } catch (error) {
-//  if (error instanceof Error && (error as any).cause) {
-//       // Provider error (e.g. OpenAI API returned 4xx/5xx)
-//       const cause = (error as any).cause;
-//       return Response.json(
-//         {
-//           name: error.name,
-//           message: error.message,
-//           status: cause?.status,
-//           headers: cause?.headers,
-//         },
-//         { status: cause?.status ?? 500 }
-//       );
-//     } else {
-//       // General error
-//       console.error('Unexpected error:', error);
-//       return Response.json(
-//         { message: 'Internal Server Error' },
-//         { status: 500 }
-//       );
-//     }
-// }
-
-// } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// This route handler uses the new AI SDK to perform a specific text generation task.
-// It is the modern equivalent of your second code snippet.
-
-
-
-
-
-// import { openai } from '@ai-sdk/openai';
-// import { streamText } from 'ai';
-
-// // Allow streaming responses up to 30 seconds
-// export const maxDuration = 30;
-
-// export async function POST(req: Request) {
-//   try {
-//     // The prompt from your original second snippet is hardcoded here.
-//     const prompt =
-//       "Create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me, and should be suitable for a diverse audience. Avoid personal or sensitive topics, focusing instead on universal themes that encourage friendly interaction. For example, your output should be structured like this: 'What’s a hobby you’ve recently started?||If you could have dinner with any historical figure, who would it be?||What’s a simple thing that makes you happy?'. Ensure the questions are intriguing, foster curiosity, and contribute to a positive and welcoming conversational environment.";
-
-//     // Use the `streamText` function from the new AI SDK.
-//     const result = streamText({
-//       // Specify the model to use. 'gpt-4o-mini' is a good, fast, and cost-effective choice.
-//       // You can also use 'gpt-4o' if you prefer.
-//       model: openai('gpt-4o-mini'), 
-      
-//       // Pass the hardcoded prompt as a single user message.
-//       // The new SDK uses a `messages` array even for single prompts.
-//       messages: [
-//         {
-//           role: 'user',
-//           content: prompt,
-//         },
-//       ],
-//     });
-
-//     // Return the streaming response.
-//     // The `toTextStreamResponse()` method is used for raw text output, similar to your second snippet.
-//     return result.toTextStreamResponse();
-//   } catch (error) {
-//     if (error instanceof Error && (error as any).cause) {
-//       // Handle provider errors (e.g., OpenAI API issues).
-//       const cause = (error as any).cause;
-//       return Response.json(
-//         {
-//           name: error.name,
-//           message: error.message,
-//           status: cause?.status,
-//           headers: cause?.headers,
-//         },
-//         { status: cause?.status ?? 500 }
-//       );
-//     } else {
-//       // Handle general errors.
-//       console.error('An unexpected error occurred:', error);
-//       return Response.json(
-//         { message: 'Internal Server Error' },
-//         { status: 500 }
-//       );
-//     }
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import { NextResponse } from 'next/server';
+// Imports Next.js helper to build server responses in App Router route files. NextResponse.json(...) creates a JSON response with status and headers.
 
 export async function POST(request: Request) {
+  // Exports an async handler for POST requests for this route. Next.js will call this function when a client POSTs to the route path.
   try {
     const geminiApiKey = process.env.GEMINI_API_KEY;
+    // Reads the Gemini API key from environment variables. This must be set on the server (never commit to source).
 
     if (!geminiApiKey) {
       return NextResponse.json({ success: false, message: "API key is not configured." }, { status: 500 });
     }
+    // If missing, returns a 500 JSON error immediately. This prevents any attempt to call the external API without credentials.
 
     const prompt =
-      "Create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me, and should be suitable for a diverse audience. Avoid personal or sensitive topics, focusing instead on universal themes that encourage friendly interaction. Ensure the questions are intriguing, foster curiosity, and contribute to a positive and welcoming conversational environment.";
+      "Create a list of three open-ended and engaging questions formatted as a single string. Each question should be separated by '||'. These questions are for an anonymous social messaging platform, like Qooh.me, and should be suitable for a diverse audience. Avoid personal or sensitive topics, focusing instead on universal themes that encourage friendly interaction. Ensure the questions are intriguing, foster curiosity, and contribute to a positive and welcoming conversational environment and not of more than 18 words.";
+
+      // This prompt string tells the LLM exactly what to produce:
+ 
 
     const payload = {
       contents: [{ parts: [{ text: prompt }] }],
     };
+         // payload is the structured JSON that wraps your prompt string inside the format the Gemini API requires. Without this wrapping (contents → parts → text), the API wouldn’t understand your input.
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`;
 
@@ -159,24 +34,82 @@ export async function POST(request: Request) {
       body: JSON.stringify(payload),
     });
 
+    // Builds the full Gemini endpoint URL using the API key in the query string (?key=...).
+    // Calls the endpoint with fetch, sending payload as JSON.
+    // Uses await so the code pauses until the request completes.
+
     if (!response.ok) {
       const errorData = await response.json();
       return NextResponse.json({ success: false, message: errorData.error.message || 'API call failed' }, { status: response.status });
     }
+    // If the HTTP response status is not 2xx, parse the error JSON from the API and return it to the client with the same status code.
 
     const result = await response.json();
     const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
 
+// What is happening here?
+// You’re reading the response from the Gemini API.
+// When Gemini replies, it usually gives you JSON shaped like this:
+
+// {
+//   "candidates": [
+//     {
+//       "content": {
+//         "parts": [
+//           { "text": "Here is the generated suggestion..." }
+//         ]
+//       }
+//     }
+//   ]
+// }
+
+
+// So, you need to dig down to the text.
+
     if (!generatedText) {
       return NextResponse.json({ success: false, message: 'No suggestions were generated.' }, { status: 500 });
     }
+    // The code expects the response to include candidates[0].content.parts[0].text. If not found, return a 500 error.
 
-    const messages = generatedText.split('||').map((msg: string) => msg.trim()).filter((msg:string) => msg.length > 0);
+    let messages = generatedText.split('||').map((msg: string) => msg.trim()).filter((msg:string) => msg.length > 0);
+
+    // Enforce max word count (≤ 18 words per message)
+messages = messages.filter((msg: string) => msg.split(/\s+/).length <= 18);
+
+// If more than 3, keep only first 3
+if (messages.length > 3) {
+  messages = messages.slice(0, 3);
+}
+
+// If fewer than 3, fallback: regenerate OR pad with defaults
+if (messages.length < 3) {
+  messages = [
+    ...messages,
+    "What's one thing that always makes you smile?",
+    "If you could visit any place, where would you go?",
+    "What's a small goal you're excited about?"
+  ].slice(0, 3); // ensure exactly 3
+}
+
+    // Splits the single string from the model on the || delimiter into an array.
+    // map(...trim()) removes whitespace around each piece.
+    // filter(...length > 0) removes any empty strings (in case of trailing delimiters or blank parts).
+    // The resulting messages array contains the suggested questions.
 
     return NextResponse.json({ success: true, messages });
+    // Returns a JSON response with success: true and the messages array (HTTP status defaults to 200).
 
   } catch (error) {
     console.error('An error occurred:', error);
     return NextResponse.json({ success: false, message: (error as Error).message }, { status: 500 });
+
+  //  Any unexpected thrown errors are caught here, logged to the server console, and a 500 JSON response is returned with the error message.
+
   }
 }
+
+
+
+
+
+
