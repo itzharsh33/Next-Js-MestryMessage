@@ -123,17 +123,21 @@
 
 
 
-
-
-
-import { NextAuthOptions } from 'next-auth';
+import { NextAuthOptions, User, Session } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
-// Import JWT and User types for better type safety
 import { JWT } from 'next-auth/jwt';
-import { User } from 'next-auth';
+
+// We define a custom user type that includes the fields from your database model.
+// This helps us avoid using 'any' and provides better type safety.
+type CustomUser = User & {
+  _id?: string;
+  isVerified?: boolean;
+  isAcceptingMessages?: boolean;
+  username?: string;
+};
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -144,13 +148,14 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials: any): Promise<any> {
+      // FIX: Replaced 'any' with specific types for credentials and the return value.
+      async authorize(credentials: Record<string, string> | undefined): Promise<User | null> {
         await dbConnect();
         try {
           const user = await UserModel.findOne({
             $or: [
-              { email: credentials.identifier },
-              { username: credentials.identifier },
+              { email: credentials?.identifier },
+              { username: credentials?.identifier },
             ],
           });
           if (!user) {
@@ -160,38 +165,48 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Please verify your account before logging in');
           }
           const isPasswordCorrect = await bcrypt.compare(
-            credentials.password,
+            credentials?.password || '',
             user.password
           );
           if (isPasswordCorrect) {
-            return user;
+            // We return the full user object from the database.
+            // It's cast to the base 'User' type to match the function's expected return type.
+            return user as User;
           } else {
             throw new Error('Incorrect password');
           }
-        } catch (err: any) {
-          throw new Error(err);
+        } catch (err: unknown) { // FIX: Replaced 'any' with 'unknown' for safer error handling.
+          if (err instanceof Error) {
+            throw new Error(err.message);
+          } else {
+            throw new Error('An unknown error occurred during authorization.');
+          }
         }
       },
     }),
   ],
   callbacks: {
-    // FIX: Replaced 'any' with specific types 'JWT' and 'User'
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token._id = user._id?.toString(); // Convert ObjectId to string
-        token.isVerified = user.isVerified;
-        token.isAcceptingMessages = user.isAcceptingMessages;
-        token.username = user.username;
+        // The 'user' object here is what we returned from 'authorize'.
+        // We cast it to our CustomUser type to safely access your database fields.
+        const customUser = user as CustomUser;
+        token._id = customUser._id?.toString();
+        token.isVerified = customUser.isVerified;
+        token.isAcceptingMessages = customUser.isAcceptingMessages;
+        token.username = customUser.username;
       }
       return token;
     },
-    // FIX: Replaced 'any' with specific types
-    async session({ session, token }: { session: any; token: JWT }) {
-      if (token) {
-        session.user._id = token._id;
-        session.user.isVerified = token.isVerified;
-        session.user.isAcceptingMessages = token.isAcceptingMessages;
-        session.user.username = token.username;
+    // FIX: Replaced 'any' with the official 'Session' type from NextAuth.
+    async session({ session, token }: { session: Session; token: JWT }) {
+      if (token && session.user) {
+        // We transfer the custom properties from the token to the session user object.
+        // Casting session.user to our custom type allows us to add the new fields.
+        (session.user as CustomUser)._id = token._id as string;
+        (session.user as CustomUser).isVerified = token.isVerified as boolean;
+        (session.user as CustomUser).isAcceptingMessages = token.isAcceptingMessages as boolean;
+        (session.user as CustomUser).username = token.username as string;
       }
       return session;
     },
@@ -204,10 +219,6 @@ export const authOptions: NextAuthOptions = {
     signIn: '/sign-in',
   },
 };
-
-
-
-
 
 
 
