@@ -1,110 +1,211 @@
-import { NextAuthOptions } from "next-auth";
-import  CredentialsProvider  from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import dbConnect from "@/lib/dbConnect";
-import UserModel from "@/model/User";
+// import { NextAuthOptions } from "next-auth";
+// import  CredentialsProvider  from "next-auth/providers/credentials";
+// import bcrypt from "bcryptjs";
+// import dbConnect from "@/lib/dbConnect";
+// import UserModel from "@/model/User";
+
+// export const authOptions: NextAuthOptions = {
+//     providers:[
+//        CredentialsProvider({
+
+//         id:'credentials',
+//         name:'Credentials',
+//         credentials: {
+//       identifier: { label: "Email", type: "text"},
+//       password: { label: "Password", type: "password" }
+//     },
+//     async authorize(credentials):Promise<any>{
+//    await dbConnect();
+//    try {
+
+//   // const user =   await UserModel.findOne({
+//   //       $or: [
+//   //           {email:credentials.identifier},
+//   //            {username:credentials.identifier}
+//   //       ]
+//     // })
+//         if (!credentials) {
+//       throw new Error("Invalid credentials");
+//     }
+
+//     const user = await UserModel.findOne({
+//       $or: [
+//         { email: credentials.identifier },
+//         { username: credentials.identifier },
+//       ],
+//     });
+//     if(!user){
+//     throw new Error("No user found with this email or username")
+//     }
+
+//       if(!user.isVerified){
+//     throw new Error('Please verify your account first before login')
+//     }
+
+//     const isPasswordCorrect = await bcrypt.compare(credentials.password,user.password);
+   
+//    if(isPasswordCorrect){
+//     return user;
+//    }else{
+//      throw new Error('Incorrect password')
+//    }
+
+//     //  if (!isPasswordCorrect) throw new Error("Invalid credentials");
+
+//     //    return {
+//     //       _id: user._id.toString(),
+//     //       username: user.username,
+//     //       email: user.email,
+//     //       isVerified: user.isVerified,
+//     //       isAcceptingMessages: user.isAcceptingMessages,
+
+ 
+
+//    } catch (err) {
+//     // used by sir
+//     //  throw new Error(err)
+//     // throw new Error(err.message || "Login error");
+    
+//       if (err instanceof Error) {
+//     throw new Error(err.message || "Login error");
+//   }
+//   throw new Error("An unknown error occurred during login");
+//    }
+//     }
+// }) 
+//     ],
+//     callbacks:{
+//     async jwt({ token, user }) {
+//         if(user){
+//             token._id=user._id?.toString()
+//             token.isVerified = user.isVerified;
+//             token.isAcceptingMessages = user.isAcceptingMessages
+//             token.username = user.username;
+            
+//         }
+//       return token
+//     },
+//       async session({ session, token }) {
+//         if(token){
+//           // used by sir
+//           // session.user._id = token._id
+//           // session.user.isVerified = token.isVerified
+//           // session.user.isAcceptingMessages = token.isAcceptingMessages
+//           // session.user.username = token.username
+
+//         // (session.user as any)._id = token._id;
+//         // (session.user as any).isVerified = token.isVerified;
+//         // (session.user as any).isAcceptingMessages = token.isAcceptingMessages;
+//         // (session.user as any).username = token.username;
+
+//           (session.user )._id = token._id;
+//         (session.user ).isVerified = token.isVerified;
+//         (session.user ).isAcceptingMessages = token.isAcceptingMessages;
+//         (session.user ).username = token.username;
+
+//         }
+//       return session
+//     },
+//     },
+  
+//       pages: {
+//         // used by sir
+//     // signIn: '/auth/signin',
+//      signIn: "/sign-in",
+//       },
+//       session:{
+//         strategy:"jwt"
+//       },
+//       secret:process.env.NEXTAUTH_SECRET
+// }
+
+
+
+
+
+
+
+
+import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
+import dbConnect from '@/lib/dbConnect';
+import UserModel from '@/model/User';
+// Import JWT and User types for better type safety
+import { JWT } from 'next-auth/jwt';
+import { User } from 'next-auth';
 
 export const authOptions: NextAuthOptions = {
-    providers:[
-       CredentialsProvider({
-
-        id:'credentials',
-        name:'Credentials',
-        credentials: {
-      identifier: { label: "Email", type: "text"},
-      password: { label: "Password", type: "password" }
-    },
-    async authorize(credentials):Promise<any>{
-   await dbConnect();
-   try {
-  // const user =   await UserModel.findOne({
-  //       $or: [
-  //           {email:credentials.identifier},
-  //            {username:credentials.identifier}
-  //       ]
-    // })
-        if (!credentials) {
-      throw new Error("Invalid credentials");
-    }
-
-    const user = await UserModel.findOne({
-      $or: [
-        { email: credentials.identifier },
-        { username: credentials.identifier },
-      ],
-    });
-    if(!user){
-    throw new Error("No user found with this email or username")
-    }
-
-      if(!user.isVerified){
-    throw new Error('Please verify your account first before login')
-    }
-
-    const isPasswordCorrect = await bcrypt.compare(credentials.password,user.password);
-   
-   if(isPasswordCorrect){
-    return user;
-   }else{
-     throw new Error('Incorrect password')
-   }
-
-   } catch (err) {
-    // used by sir
-    //  throw new Error(err)
-    // throw new Error(err.message || "Login error");
-      if (err instanceof Error) {
-    throw new Error(err.message || "Login error");
-  }
-  throw new Error("An unknown error occurred during login");
-   }
-    }
-}) 
-    ],
-    callbacks:{
-    async jwt({ token, user }) {
-        if(user){
-            token._id=user._id?.toString()
-            token.isVerified = user.isVerified;
-            token.isAcceptingMessages = user.isAcceptingMessages
-            token.username = user.username;
-            
-        }
-      return token
-    },
-      async session({ session, token }) {
-        if(token){
-          // used by sir
-          // session.user._id = token._id
-          // session.user.isVerified = token.isVerified
-          // session.user.isAcceptingMessages = token.isAcceptingMessages
-          // session.user.username = token.username
-
-        // (session.user as any)._id = token._id;
-        // (session.user as any).isVerified = token.isVerified;
-        // (session.user as any).isAcceptingMessages = token.isAcceptingMessages;
-        // (session.user as any).username = token.username;
-
-          (session.user )._id = token._id;
-        (session.user ).isVerified = token.isVerified;
-        (session.user ).isAcceptingMessages = token.isAcceptingMessages;
-        (session.user ).username = token.username;
-
-        }
-      return session
-    },
-    },
-  
-      pages: {
-        // used by sir
-    // signIn: '/auth/signin',
-     signIn: "/sign-in",
+  providers: [
+    CredentialsProvider({
+      id: 'credentials',
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
-      session:{
-        strategy:"jwt"
+      async authorize(credentials: any): Promise<any> {
+        await dbConnect();
+        try {
+          const user = await UserModel.findOne({
+            $or: [
+              { email: credentials.identifier },
+              { username: credentials.identifier },
+            ],
+          });
+          if (!user) {
+            throw new Error('No user found with this email');
+          }
+          if (!user.isVerified) {
+            throw new Error('Please verify your account before logging in');
+          }
+          const isPasswordCorrect = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+          if (isPasswordCorrect) {
+            return user;
+          } else {
+            throw new Error('Incorrect password');
+          }
+        } catch (err: any) {
+          throw new Error(err);
+        }
       },
-      secret:process.env.NEXTAUTH_SECRET
-}
+    }),
+  ],
+  callbacks: {
+    // FIX: Replaced 'any' with specific types 'JWT' and 'User'
+    async jwt({ token, user }: { token: JWT; user?: User }) {
+      if (user) {
+        token._id = user._id?.toString(); // Convert ObjectId to string
+        token.isVerified = user.isVerified;
+        token.isAcceptingMessages = user.isAcceptingMessages;
+        token.username = user.username;
+      }
+      return token;
+    },
+    // FIX: Replaced 'any' with specific types
+    async session({ session, token }: { session: any; token: JWT }) {
+      if (token) {
+        session.user._id = token._id;
+        session.user.isVerified = token.isVerified;
+        session.user.isAcceptingMessages = token.isAcceptingMessages;
+        session.user.username = token.username;
+      }
+      return session;
+    },
+  },
+  session: {
+    strategy: 'jwt',
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: '/sign-in',
+  },
+};
+
+
 
 
 
