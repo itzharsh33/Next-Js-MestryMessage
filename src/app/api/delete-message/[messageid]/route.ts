@@ -4,16 +4,23 @@ import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
 import { User } from "next-auth";
 
+interface Params {
+  params: {
+    messageid: string;
+  };
+}
+
 
 export async function DELETE(request:Request,
-  // {params}:{params:{messageid:string}}
-  context: { params: { messageid: string } }
+  {params}:{params:{messageid:string}}
+  // context: { params: { messageid: string } }
 ){
   // const messageId = params.messageid
-  const messageId = context.params.messageid;
+  const messageId = params.messageid;
   await dbConnect();
   const session = await getServerSession(authOptions);
-  const user: User = session?.user;
+  // const user: User = session?.user;
+    const user = session?.user as User & { _id: string };
   // const user: User = session?.user as User
   if (!session || !session.user) {
     return Response.json(
