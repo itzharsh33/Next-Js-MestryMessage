@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import {Loader2} from 'lucide-react'
 import { signIn } from "next-auth/react"
 useRouter
-const page = () => {
+const Page = () => {
 
 
   
@@ -139,7 +139,7 @@ if (result?.error) {
   )
 }
 
-export default page
+export default Page
 
 
 

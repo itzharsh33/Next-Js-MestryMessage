@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {Loader2} from 'lucide-react'
 // useRouter
-const page = () => {
+const Page = () => {
   const [username, setusername] = useState('')
   const [usernameMessage, setusernameMessage] = useState('')
   const [isCheckingUsername, setisCheckingUsername] = useState(false)
@@ -173,7 +173,7 @@ setisSubmitting(false)
   )
 }
 
-export default page
+export default Page
 
 
 

@@ -30,9 +30,10 @@ try {
     console.log(result)  // TODO: remove
     if(!result.success){
         // const usernameErrors=result.error.format().username?._errors
-          const tree = z.treeifyError(result.error);
+        //   const tree = z.treeifyError(result.error);
+        const usernameErrors = result.error.format().username?._errors || [];
 //   const usernameErrors = tree.username?._errors;
-  const usernameErrors = tree.properties?.username?.errors||[];
+//   const usernameErrors = tree.properties?.username?.errors||[];
   return Response.json({
   success:false,
   message:usernameErrors?.length>0
