@@ -155,6 +155,7 @@ import UserModel from '@/model/User';
 export async function DELETE(
   request: Request,
   // DEBUGGING: Using 'any' to bypass a potential type-checking issue.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: any
 ) {
   // You access messageid through context.params
