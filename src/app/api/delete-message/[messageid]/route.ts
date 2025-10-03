@@ -76,20 +76,21 @@
 
 
 
-
-
-
 import { getServerSession } from 'next-auth/next';
 import { User } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/options';
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
 
+interface ExtendedUser extends User {
+  _id: string;
+}
+
 export async function DELETE(
   request: Request,
-  context: { params: Record<string, string> }   // ✅ FIXED TYPE
+  context: { params: Record<string, string> }
 ) {
-  const messageId = context.params.messageid;   // ✅ SAFE ACCESS
+  const messageId = context.params.messageid;
 
   if (!messageId) {
     return Response.json(
@@ -101,7 +102,7 @@ export async function DELETE(
   await dbConnect();
 
   const session = await getServerSession(authOptions);
-  const user: User = session?.user as User;
+  const user = session?.user as ExtendedUser;
 
   if (!session || !user) {
     return Response.json(
@@ -112,7 +113,7 @@ export async function DELETE(
 
   try {
     const updateResult = await UserModel.updateOne(
-      { _id: (user as any)._id },     // or use your custom type here if available
+      { _id: user._id },   // ✅ No more `any`
       { $pull: { messages: { _id: messageId } } }
     );
 
@@ -127,7 +128,7 @@ export async function DELETE(
       { success: true, message: 'Message deleted' },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {     // ✅ No more `any` here either
     console.error('Error deleting message:', error);
     return Response.json(
       { success: false, message: 'Error deleting message' },
@@ -135,7 +136,6 @@ export async function DELETE(
     );
   }
 }
-
 
 
 
