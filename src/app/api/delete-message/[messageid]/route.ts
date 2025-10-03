@@ -76,79 +76,6 @@
 
 
 
-import { getServerSession } from 'next-auth/next';
-import { User } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/options';
-import dbConnect from '@/lib/dbConnect';
-import UserModel from '@/model/User';
-
-interface ExtendedUser extends User {
-  _id: string;
-}
-
-export async function DELETE(
-  request: Request,
-  context: { params: Record<string, string> }
-) {
-  const messageId = context.params.messageid;
-
-  if (!messageId) {
-    return Response.json(
-      { success: false, message: 'Message ID not found in request' },
-      { status: 400 }
-    );
-  }
-
-  await dbConnect();
-
-  const session = await getServerSession(authOptions);
-  const user = session?.user as ExtendedUser;
-
-  if (!session || !user) {
-    return Response.json(
-      { success: false, message: 'Not authenticated' },
-      { status: 401 }
-    );
-  }
-
-  try {
-    const updateResult = await UserModel.updateOne(
-      { _id: user._id },   // ✅ No more `any`
-      { $pull: { messages: { _id: messageId } } }
-    );
-
-    if (updateResult.modifiedCount === 0) {
-      return Response.json(
-        { success: false, message: 'Message not found or already deleted' },
-        { status: 404 }
-      );
-    }
-
-    return Response.json(
-      { success: true, message: 'Message deleted' },
-      { status: 200 }
-    );
-  } catch (error: unknown) {     // ✅ No more `any` here either
-    console.error('Error deleting message:', error);
-    return Response.json(
-      { success: false, message: 'Error deleting message' },
-      { status: 500 }
-    );
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -219,68 +146,68 @@ export async function DELETE(
 
 
 
-// import { getServerSession } from 'next-auth/next';
-// import { User } from 'next-auth';
-// import { authOptions } from '../../auth/[...nextauth]/options';
-// import dbConnect from '@/lib/dbConnect';
-// import UserModel from '@/model/User';
+import { getServerSession } from 'next-auth/next';
+import { User } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/options';
+import dbConnect from '@/lib/dbConnect';
+import UserModel from '@/model/User';
 
-// export async function DELETE(
-//   request: Request,
-//   // DEBUGGING: Using 'any' to bypass a potential type-checking issue.
-//   context: any
-// ) {
-//   // You access messageid through context.params
-//   const messageId = context.params.messageid;
+export async function DELETE(
+  request: Request,
+  // DEBUGGING: Using 'any' to bypass a potential type-checking issue.
+  context: any
+) {
+  // You access messageid through context.params
+  const messageId = context.params.messageid;
 
-//   // It's good practice to add a check here in case the structure is not what you expect
-//   if (!messageId) {
-//     return Response.json(
-//       { success: false, message: 'Message ID not found in request' },
-//       { status: 400 }
-//     );
-//   }
+  // It's good practice to add a check here in case the structure is not what you expect
+  if (!messageId) {
+    return Response.json(
+      { success: false, message: 'Message ID not found in request' },
+      { status: 400 }
+    );
+  }
 
-//   await dbConnect();
+  await dbConnect();
 
-//   const session = await getServerSession(authOptions);
-//   const user: User = session?.user as User;
+  const session = await getServerSession(authOptions);
+  const user: User = session?.user as User;
 
-//   if (!session || !user) {
-//     return Response.json(
-//       { success: false, message: 'Not authenticated' },
-//       { status: 401 }
-//     );
-//   }
+  if (!session || !user) {
+    return Response.json(
+      { success: false, message: 'Not authenticated' },
+      { status: 401 }
+    );
+  }
 
-//   try {
-//     const updateResult = await UserModel.updateOne(
-//       { _id: user._id },
-//       { $pull: { messages: { _id: messageId } } }
-//     );
+  try {
+    const updateResult = await UserModel.updateOne(
+      { _id: user._id },
+      { $pull: { messages: { _id: messageId } } }
+    );
 
-//     if (updateResult.modifiedCount === 0) {
-//       return Response.json(
-//         {
-//           success: false,
-//           message: 'Message not found or already deleted',
-//         },
-//         { status: 404 }
-//       );
-//     }
+    if (updateResult.modifiedCount === 0) {
+      return Response.json(
+        {
+          success: false,
+          message: 'Message not found or already deleted',
+        },
+        { status: 404 }
+      );
+    }
 
-//     return Response.json(
-//       { success: true, message: 'Message deleted' },
-//       { status: 200 }
-//     );
-//   } catch (error) {
-//     console.error('Error deleting message:', error);
-//     return Response.json(
-//       { success: false, message: 'Error deleting message' },
-//       { status: 500 }
-//     );
-//   }
-// }
+    return Response.json(
+      { success: true, message: 'Message deleted' },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    return Response.json(
+      { success: false, message: 'Error deleting message' },
+      { status: 500 }
+    );
+  }
+}
 
 
 
