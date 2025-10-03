@@ -77,24 +77,23 @@
 
 
 
+
+
 import { getServerSession } from 'next-auth/next';
 import { User } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/options';
+import { authOptions } from '../../auth/[...nextauth]/options';
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
-import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { messageid: string } }
+  context: { params: Record<string, string> }   // ✅ FIXED TYPE
 ) {
-  const messageid = params.messageid;
+  const messageId = context.params.messageid;   // ✅ SAFE ACCESS
 
-  // Check if the provided ID is a valid MongoDB ObjectId
-  if (!mongoose.Types.ObjectId.isValid(messageid)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid Message ID' },
+  if (!messageId) {
+    return Response.json(
+      { success: false, message: 'Message ID not found in request' },
       { status: 400 }
     );
   }
@@ -102,10 +101,10 @@ export async function DELETE(
   await dbConnect();
 
   const session = await getServerSession(authOptions);
-  const user = session?.user as User;
+  const user: User = session?.user as User;
 
   if (!session || !user) {
-    return NextResponse.json(
+    return Response.json(
       { success: false, message: 'Not authenticated' },
       { status: 401 }
     );
@@ -113,24 +112,24 @@ export async function DELETE(
 
   try {
     const updateResult = await UserModel.updateOne(
-      { _id: user._id },
-      { $pull: { messages: { _id: new mongoose.Types.ObjectId(messageid) } } }
+      { _id: (user as any)._id },     // or use your custom type here if available
+      { $pull: { messages: { _id: messageId } } }
     );
 
     if (updateResult.modifiedCount === 0) {
-      return NextResponse.json(
+      return Response.json(
         { success: false, message: 'Message not found or already deleted' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(
+    return Response.json(
       { success: true, message: 'Message deleted' },
       { status: 200 }
     );
   } catch (error) {
     console.error('Error deleting message:', error);
-    return NextResponse.json(
+    return Response.json(
       { success: false, message: 'Error deleting message' },
       { status: 500 }
     );
