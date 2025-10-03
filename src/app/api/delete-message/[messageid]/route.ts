@@ -77,13 +77,13 @@
 
 
 
-
 import { getServerSession } from 'next-auth/next';
 import { User } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/options';
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 
 export async function DELETE(
   request: Request,
@@ -91,9 +91,10 @@ export async function DELETE(
 ) {
   const messageid = params.messageid;
 
-  if (!messageid) {
+  // Check if the provided ID is a valid MongoDB ObjectId
+  if (!mongoose.Types.ObjectId.isValid(messageid)) {
     return NextResponse.json(
-      { success: false, message: 'Message ID not found in request' },
+      { success: false, message: 'Invalid Message ID' },
       { status: 400 }
     );
   }
@@ -101,7 +102,7 @@ export async function DELETE(
   await dbConnect();
 
   const session = await getServerSession(authOptions);
-  const user: User = session?.user as User;
+  const user = session?.user as User;
 
   if (!session || !user) {
     return NextResponse.json(
@@ -113,7 +114,7 @@ export async function DELETE(
   try {
     const updateResult = await UserModel.updateOne(
       { _id: user._id },
-      { $pull: { messages: { _id: messageid } } }
+      { $pull: { messages: { _id: new mongoose.Types.ObjectId(messageid) } } }
     );
 
     if (updateResult.modifiedCount === 0) {
@@ -135,7 +136,6 @@ export async function DELETE(
     );
   }
 }
-
 
 
 
