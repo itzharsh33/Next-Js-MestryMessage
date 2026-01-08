@@ -24,7 +24,13 @@ export async function POST(request: Request) {
     };
          // payload is the structured JSON that wraps your prompt string inside the format the Gemini API requires. Without this wrapping (contents → parts → text), the API wouldn’t understand your input.
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`;
+         // old api url not working
+    // const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${geminiApiKey}`;
+
+    // suggested by chatgpt
+    const apiUrl =
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+
 
     const response = await fetch(apiUrl, {
       method: 'POST',
