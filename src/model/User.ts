@@ -20,7 +20,7 @@ const MessageSchema: Schema<Message> = new Schema({
     default: Date.now(),
   },
 });
-
+// added comment
 export interface User extends Document {
     // _id: string;   
   username: string;
